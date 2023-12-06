@@ -3,9 +3,6 @@ import { Link } from "react-router-dom";
 
 const Chat = ({ chat, user }) => {
   const [otherUser, setOtherUser] = useState(null);
-
-  // if user.id === doctor_id then
-
   useEffect(() => {
     // get other users data
     const otherUserId =

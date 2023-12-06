@@ -40,7 +40,7 @@ const Chats = ({ user }) => {
       </div>
       <ul className="user-chats">
         {usersChats.map((chat, i) => (
-          <li key={chat.id}>
+          <li key={chat.id} className={chatId === chat.id ? "active" : ""}>
             {/* step 2 */}
             {/* set the chat id as a param */}
             <Chat chat={chat} user={user} />

@@ -139,7 +139,7 @@ section {
   background: #cccccc38;
 }
 
-.user-chats li a.active {
+.user-chats li.active a {
   background: #cfe5f2;
 }
 
@@ -518,6 +518,14 @@ section {
     align-items: center;
     min-height: 27px;
     max-height: 81px;
+  }
+  .message .text-container {
+    border-radius: 6px 6px 6px 0px;
+    background: #d0eafb;
+  }
+  .message .text-container.own {
+    border-radius: 6px 6px 0px 6px;
+    background: #107bc0;
   }
 
   .hid {

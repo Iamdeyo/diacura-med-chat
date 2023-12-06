@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import socket from "../socket";
 import Chats from "../components/Chats";
+import Messages from "../components/Messages";
 
 const patient1 = {
   id: "6566091f85e56c91bfbf60bd",
@@ -12,7 +13,7 @@ const patient1 = {
   first_name: "Wonuola",
   last_name: "Adekunle",
   token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjYwOTFmODVlNTZjOTFiZmJmNjBiZCIsImlhdCI6MTcwMTc3NTExNCwiZXhwIjoxNzAxODYxNTE0fQ.Bw6OMwkfqyqIDhL9uLpPLlXeR9yP6gkRjaVS6i-7csg",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjYwOTFmODVlNTZjOTFiZmJmNjBiZCIsImlhdCI6MTcwMTg1MDEyOSwiZXhwIjoxNzAxOTM2NTI5fQ.LUFAcK73yWWnS5YbUgVtkSY6xbqC8Jjcc-KSNa_LJfo",
 };
 
 const patient2 = {
@@ -24,7 +25,7 @@ const patient2 = {
   first_name: "ransom",
   last_name: "addison",
   token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1Njc1OWViNzdhNjhlYWZjYzFiMTBlOSIsImlhdCI6MTcwMTc4ODM0NiwiZXhwIjoxNzAxODc0NzQ2fQ.tQhJ5xLHjSrapNmFkA7-le8bqpBaZa--AjYQP-538mg",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1Njc1OWViNzdhNjhlYWZjYzFiMTBlOSIsImlhdCI6MTcwMTg1MDA4MywiZXhwIjoxNzAxOTM2NDgzfQ.BiTFrO7FxvRnI70OKsVXUpP5DivWzgV01LjJfdfS-tI",
 };
 const doctor = {
   id: "6564a905ca61f3ed79aa33d9",
@@ -39,55 +40,10 @@ const doctor = {
 };
 
 const Chat = () => {
-  const [user, setUser] = useState(doctor);
-  const [messages, setMessages] = useState([]);
-  const [messageData, setMessageData] = useState({
-    chatId: "",
-    sender: "",
-    receiver: "",
-    text: "",
-  });
+  const [user, setUser] = useState(null);
 
-  function formatTimeString(dateString) {
-    const dateObject = new Date(dateString);
-
-    const hours = dateObject.getHours();
-    const minutes = dateObject.getMinutes();
-
-    const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
-      .toString()
-      .padStart(2, "0")}`;
-
-    return formattedTime;
-  }
-
-  // step 3
   // Get the chat id param from the URL and fetch messages.
   const { id: chatId } = useParams();
-  useEffect(() => {
-    const getMessages = async () => {
-      try {
-        const res = await fetch(
-          `http://localhost:3000/api/chat/get-messages/${chatId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: "Bearer " + user?.token,
-            },
-          }
-        );
-        if (res.ok) {
-          const messages = await res.json();
-          setMessages(messages.data);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    if (chatId && user) {
-      getMessages();
-    }
-  }, [chatId, user]);
 
   // step 4
   // connect to socket.io server
@@ -115,32 +71,9 @@ const Chat = () => {
     };
   }, [user, chatId]);
 
-  useEffect(() => {
-    const handleIncomingMessage = (message) => {
-      setMessages((prev) => [message, ...prev]);
-    };
-    socket.on("getMessage", handleIncomingMessage);
-
-    // Specify the cleanup function
-    return () => {
-      // Remove the event listener when the component is unmounted
-      socket.off("getMessage", handleIncomingMessage);
-    };
-  }, []);
-
-  const handleSendMessage = () => {
-    socket.emit("sendMessage", chatId, messageData);
-    setMessageData({
-      chatId: "",
-      sender: "",
-      receiver: "",
-      text: "",
-    });
-  };
-
   return (
     <>
-      {/* {!user && (
+      {!user && (
         <div className="select-user-container">
           <p>Sign in as a </p>
           <button onClick={() => setUser(doctor)}>Doctor</button>
@@ -149,7 +82,7 @@ const Chat = () => {
           <span>or</span>
           <button onClick={() => setUser(patient2)}>Patient 2</button>
         </div>
-      )} */}
+      )}
       <section>
         <div className={`chat-top ${chatId ? "hid" : ""}`}>
           <h2 className="title">Chat</h2>
@@ -225,96 +158,7 @@ const Chat = () => {
         </div>
         <div className="chat-main">
           <Chats user={user} />
-          {chatId && (
-            <div className="chat-messages">
-              <div className="chat-messages-top">
-                <img
-                  src="/user-img.png"
-                  alt="user photo"
-                  className="user-photo"
-                />
-                <h2 className="username"> Exa Agu</h2>
-                <span className="icons">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="25"
-                    viewBox="0 0 24 25"
-                    fill="none"
-                  >
-                    <path
-                      d="M18.676 20.1076L12.961 14.3916C10.4187 16.1991 6.91544 15.757 4.90188 13.3746C2.88831 10.9921 3.03616 7.46422 5.242 5.25863C7.44726 3.05208 10.9755 2.90359 13.3584 4.91705C15.7413 6.9305 16.1836 10.4341 14.376 12.9766L20.091 18.6926L18.677 20.1066L18.676 20.1076ZM9.484 5.50062C7.58771 5.50019 5.95169 6.83131 5.56648 8.68807C5.18126 10.5448 6.15271 12.4169 7.89268 13.1709C9.63265 13.9248 11.6629 13.3535 12.7542 11.8027C13.8456 10.2519 13.6981 8.14795 12.401 6.76463L13.006 7.36463L12.324 6.68463L12.312 6.67263C11.5638 5.91981 10.5454 5.49776 9.484 5.50062Z"
-                      fill="#0D67A0"
-                    />
-                  </svg>
-                </span>
-                <span className="icons">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="25"
-                    viewBox="0 0 24 25"
-                    fill="none"
-                  >
-                    <path
-                      d="M13 16.5H12V12.5H11M12 8.5H12.01M21 12.5C21 17.4706 16.9706 21.5 12 21.5C7.02944 21.5 3 17.4706 3 12.5C3 7.52944 7.02944 3.5 12 3.5C16.9706 3.5 21 7.52944 21 12.5Z"
-                      stroke="#0D67A0"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </span>
-              </div>
-              <ul className="message-container">
-                {messages.map((mgs) => (
-                  <li className="message own" key={mgs.id}>
-                    <div className="info">
-                      <img
-                        src="/user-img.png"
-                        alt="user photo"
-                        className="user-photo"
-                      />
-                      <span className="time">
-                        {formatTimeString(mgs.createAt)}
-                      </span>
-                    </div>
-                    <div className="text-container">
-                      <p
-                        className="text"
-                        dangerouslySetInnerHTML={{
-                          __html: mgs.text.replace(/\n/g, "<br/>"),
-                        }}
-                      ></p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <div className="chat-messages-bottom">
-                <div className="input-area">
-                  <div className="shadow">{messageData.text}</div>
-                  <textarea
-                    name="message"
-                    value={messageData.text}
-                    onChange={(e) =>
-                      setMessageData({
-                        receiver: "tryt",
-                        text: e.target.value,
-                        chatId: chatId,
-                        sender: user.id,
-                      })
-                    }
-                    placeholder="Type Here..."
-                  ></textarea>
-                </div>
-                <div className="btns">
-                  <button className="send" onClick={handleSendMessage}>
-                    Send
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+          {chatId && <Messages user={user} />}
         </div>
       </section>
     </>
