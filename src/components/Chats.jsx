@@ -1,19 +1,20 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Chat from "./Chat";
 
-const Chats = ({ user }) => {
+const BASE_URL = "https://diacura-med.onrender.com";
+
+const Chats = ({ user, onlineUsers }) => {
   const [usersChats, setUsersChats] = useState([]);
-
-  // Get the chat id param from the URL and fetch messages.
+  const [targetId, setTargetId] = useState(null);
   const { id: chatId } = useParams();
+  // Declare reorderedChats at the component scope
+  const [reorderedChats, setReorderedChats] = useState([]);
 
-  // step 1
-  // get all user chats
   useEffect(() => {
     const getUserChats = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/chat", {
+        const res = await fetch(`${BASE_URL}/api/chat`, {
           method: "GET",
           headers: {
             Authorization: "Bearer " + user?.token,
@@ -27,10 +28,31 @@ const Chats = ({ user }) => {
         console.log(err);
       }
     };
+
     if (user) {
       getUserChats();
     }
   }, [user]);
+
+  useEffect(() => {
+    // Function to move an element to the front of the array
+    function moveElementToFront(array, targetId) {
+      const targetIndex = array.findIndex((item) => item.id === targetId);
+
+      if (targetIndex !== -1) {
+        return [
+          array[targetIndex],
+          ...array.slice(0, targetIndex),
+          ...array.slice(targetIndex + 1),
+        ];
+      }
+
+      return array; // If the target element is not found, return the original array
+    }
+
+    // Move the chat with the specified ID to the front
+    setReorderedChats(moveElementToFront(usersChats, targetId));
+  }, [targetId, usersChats]); // Include usersChats as a dependency
 
   return (
     <aside className={`chat-sidebar ${chatId ? "hid" : ""}`}>
@@ -40,11 +62,14 @@ const Chats = ({ user }) => {
         <p>Unread</p>
       </div>
       <ul className="user-chats">
-        {usersChats.map((chat, i) => (
-          <li key={chat.id} className={chatId === chat.id ? "active" : ""}>
-            {/* step 2 */}
-            {/* set the chat id as a param */}
-            <Chat chat={chat} user={user} />
+        {reorderedChats.map((chat, i) => (
+          <li key={chat.id} className={`${chatId === chat.id ? "active" : ""}`}>
+            <Chat
+              chat={chat}
+              user={user}
+              setTargetId={setTargetId}
+              onlineUsers={onlineUsers}
+            />
           </li>
         ))}
       </ul>

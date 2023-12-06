@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import socket from "../socket";
 import Message from "./Message";
-
+const BASE_URL = "https://diacura-med.onrender.com";
 const Messages = ({ user }) => {
   const [messages, setMessages] = useState([]);
   const [chatInfo, setChatInfo] = useState(null);
@@ -20,15 +20,12 @@ const Messages = ({ user }) => {
   useEffect(() => {
     const getMessages = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:3000/api/chat/get-messages/${chatId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: "Bearer " + user?.token,
-            },
-          }
-        );
+        const res = await fetch(`${BASE_URL}/api/chat/get-messages/${chatId}`, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + user?.token,
+          },
+        });
         if (res.ok) {
           const chat = await res.json();
           setChatInfo(chat.data);
@@ -66,15 +63,12 @@ const Messages = ({ user }) => {
           ? chatInfo.patient_id
           : chatInfo.doctor_id;
       try {
-        const res = await fetch(
-          `http://localhost:3000/api/user/${otherUserId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: "Bearer " + user?.token,
-            },
-          }
-        );
+        const res = await fetch(`${BASE_URL}/api/user/${otherUserId}`, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + user?.token,
+          },
+        });
         const data = await res.json();
         setOtherUser(data.data);
       } catch (err) {

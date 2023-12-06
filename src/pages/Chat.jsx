@@ -13,7 +13,7 @@ const patient1 = {
   first_name: "Wonuola",
   last_name: "Adekunle",
   token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjYwOTFmODVlNTZjOTFiZmJmNjBiZCIsImlhdCI6MTcwMTg1MDEyOSwiZXhwIjoxNzAxOTM2NTI5fQ.LUFAcK73yWWnS5YbUgVtkSY6xbqC8Jjcc-KSNa_LJfo",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjYwOTFmODVlNTZjOTFiZmJmNjBiZCIsImlhdCI6MTcwMTg2NTQ5OSwiZXhwIjoxNzAxOTUxODk5fQ.eS-7yoY32Sq537XTaVnkprfLFJ6SZEttmMBvl07rMDc",
 };
 
 const patient2 = {
@@ -25,7 +25,7 @@ const patient2 = {
   first_name: "ransom",
   last_name: "addison",
   token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1Njc1OWViNzdhNjhlYWZjYzFiMTBlOSIsImlhdCI6MTcwMTg1MDA4MywiZXhwIjoxNzAxOTM2NDgzfQ.BiTFrO7FxvRnI70OKsVXUpP5DivWzgV01LjJfdfS-tI",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1Njc1OWViNzdhNjhlYWZjYzFiMTBlOSIsImlhdCI6MTcwMTg2NTgzOSwiZXhwIjoxNzAxOTUyMjM5fQ.D7Qx1nTAHNuQsMAgHOgJe3fMnM9k0q3F6lNxgTRjlSY",
 };
 const doctor = {
   id: "6564a905ca61f3ed79aa33d9",
@@ -36,11 +36,12 @@ const doctor = {
   first_name: "John",
   last_name: "kings",
   token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjRhOTA1Y2E2MWYzZWQ3OWFhMzNkOSIsImlhdCI6MTcwMTg0NTUzMiwiZXhwIjoxNzAxOTMxOTMyfQ.0BzsgTcScljth6MAE_XEN6ClhEb9OInjYcd_OQxjL8Y",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjRhOTA1Y2E2MWYzZWQ3OWFhMzNkOSIsImlhdCI6MTcwMTg2NTcyNiwiZXhwIjoxNzAxOTUyMTI2fQ.ACU9h3eWlOPNg_301BIRhlEpK4NyKPtQDurIZmLxM-g",
 };
 
 const Chat = () => {
   const [user, setUser] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   // Get the chat id param from the URL and fetch messages.
   const { id: chatId } = useParams();
@@ -56,7 +57,7 @@ const Chat = () => {
 
       // Update online users list
       socket.on("updateOnlineUsers", (users) => {
-        console.log(users);
+        setOnlineUsers(users);
       });
     }
 
@@ -157,7 +158,7 @@ const Chat = () => {
           </div>
         </div>
         <div className="chat-main">
-          <Chats user={user} />
+          <Chats user={user} onlineUsers={onlineUsers} />
           {chatId && <Messages user={user} />}
         </div>
       </section>

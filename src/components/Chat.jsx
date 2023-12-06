@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import socket from "../socket";
-
-const Chat = ({ chat, user }) => {
+const BASE_URL = "https://diacura-med.onrender.com";
+const Chat = ({ chat, user, onlineUsers, setTargetId }) => {
   const [otherUser, setOtherUser] = useState(null);
-  const { id: chatId } = useParams();
   const [lastMessage, setLastMessage] = useState(chat.last_message);
   const [lastMessageCount, setLastMessageCount] = useState(0);
+  const [online, setOnline] = useState(false);
 
   useEffect(() => {
     // get other users data
@@ -14,15 +14,12 @@ const Chat = ({ chat, user }) => {
       user.id === chat.doctor_id ? chat.patient_id : chat.doctor_id;
     const getUser = async () => {
       try {
-        const res = await fetch(
-          `http://localhost:3000/api/user/${otherUserId}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: "Bearer " + user?.token,
-            },
-          }
-        );
+        const res = await fetch(`${BASE_URL}/api/user/${otherUserId}`, {
+          method: "GET",
+          headers: {
+            Authorization: "Bearer " + user?.token,
+          },
+        });
         const data = await res.json();
         setOtherUser(data.data);
       } catch (err) {
@@ -33,9 +30,20 @@ const Chat = ({ chat, user }) => {
   }, []);
 
   useEffect(() => {
+    if (onlineUsers.length > 0 && otherUser) {
+      onlineUsers.forEach((ol) => {
+        if (ol.userId === otherUser?.id) {
+          setOnline(true);
+        }
+      });
+    }
+  }, [onlineUsers, otherUser]);
+
+  useEffect(() => {
     const handleIncomingLastMessage = (message) => {
       if (message.id === chat.id) {
         setLastMessage(message.last_message);
+        setTargetId(chat.id);
       }
     };
     socket.on("lastMgs", handleIncomingLastMessage);
@@ -49,6 +57,7 @@ const Chat = ({ chat, user }) => {
 
   return (
     <Link to={`/chat/${chat.id}`}>
+      {<span className={online ? "online-icon" : "offline-icon"}></span>}
       <img
         src={otherUser?.display_photo ? otherUser.display_photo : "/no-dp.png"}
         alt="user photo"
