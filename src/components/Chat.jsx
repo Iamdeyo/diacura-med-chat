@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import socket from "../socket";
 
 const Chat = ({ chat, user }) => {
   const [otherUser, setOtherUser] = useState(null);
+  const { id: chatId } = useParams();
+  const [lastMessage, setLastMessage] = useState(chat.last_message);
+  const [lastMessageCount, setLastMessageCount] = useState(0);
+
   useEffect(() => {
     // get other users data
     const otherUserId =
@@ -26,6 +31,22 @@ const Chat = ({ chat, user }) => {
     };
     getUser();
   }, []);
+
+  useEffect(() => {
+    const handleIncomingLastMessage = (message) => {
+      if (message.id === chat.id) {
+        setLastMessage(message.last_message);
+      }
+    };
+    socket.on("lastMgs", handleIncomingLastMessage);
+
+    // Specify the cleanup function
+    return () => {
+      // Remove the event listener when the component is unmounted
+      socket.off("lastMgs", handleIncomingLastMessage);
+    };
+  }, []);
+
   return (
     <Link to={`/chat/${chat.id}`}>
       <img
@@ -41,8 +62,10 @@ const Chat = ({ chat, user }) => {
           <span className="time"> 11:58 </span>
         </div>
         <div className="text-bottom">
-          <p className="last-mgs">Lorem ips</p>
-          <span className="unread-mgs-count">03</span>
+          <p className="last-mgs">{lastMessage}</p>
+          {lastMessageCount > 0 && (
+            <span className="unread-mgs-count">{lastMessageCount}</span>
+          )}
         </div>
       </div>
     </Link>

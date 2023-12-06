@@ -11,6 +11,7 @@ const Messages = ({ user }) => {
     chatId: "",
     sender: "",
     text: "",
+    receiver: "",
   });
   const navigate = useNavigate();
   // step 3
@@ -165,6 +166,10 @@ const Messages = ({ user }) => {
                 text: e.target.value,
                 chatId: chatId,
                 sender: user.id,
+                receiver:
+                  user.id !== chatInfo.patient_id
+                    ? chatInfo.patient_id
+                    : chatInfo.doctor_id,
               })
             }
             placeholder="Type Here..."

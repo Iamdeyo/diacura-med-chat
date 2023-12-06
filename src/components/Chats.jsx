@@ -31,6 +31,7 @@ const Chats = ({ user }) => {
       getUserChats();
     }
   }, [user]);
+
   return (
     <aside className={`chat-sidebar ${chatId ? "hid" : ""}`}>
       <div className="user-chats-top">
