@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import socket from "../socket";
+import Chats from "../components/Chats";
 
 const patient1 = {
   id: "6566091f85e56c91bfbf60bd",
@@ -34,12 +35,11 @@ const doctor = {
   first_name: "John",
   last_name: "kings",
   token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjRhOTA1Y2E2MWYzZWQ3OWFhMzNkOSIsImlhdCI6MTcwMTc4NDg4MSwiZXhwIjoxNzAxODcxMjgxfQ.ZtmOczKe_0Sro1MVjybOpLzHKmCWAfkiWKkd4eWHVpo",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1NjRhOTA1Y2E2MWYzZWQ3OWFhMzNkOSIsImlhdCI6MTcwMTg0NTUzMiwiZXhwIjoxNzAxOTMxOTMyfQ.0BzsgTcScljth6MAE_XEN6ClhEb9OInjYcd_OQxjL8Y",
 };
 
 const Chat = () => {
   const [user, setUser] = useState(doctor);
-  const [usersChats, setUsersChats] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageData, setMessageData] = useState({
     chatId: "",
@@ -60,31 +60,6 @@ const Chat = () => {
 
     return formattedTime;
   }
-
-  // step 1
-  // get all user chats
-  useEffect(() => {
-    const getUserChats = async () => {
-      try {
-        const res = await fetch("http://localhost:3000/api/chat", {
-          method: "GET",
-          headers: {
-            Authorization: "Bearer " + user?.token,
-          },
-        });
-        if (res.ok) {
-          const chats = await res.json();
-          setUsersChats(chats.data);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    if (user) {
-      console.log("yes");
-      getUserChats();
-    }
-  }, [user]);
 
   // step 3
   // Get the chat id param from the URL and fetch messages.
@@ -161,26 +136,6 @@ const Chat = () => {
       receiver: "",
       text: "",
     });
-  };
-
-  const forgetPassword = async () => {
-    const email = { email: "dtechlord@gmail.com" };
-    try {
-      const res = await fetch(
-        " https://diacura-med.onrender.com/api/auth/forgot-password",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json;charset=utf-8",
-          },
-          body: JSON.stringify(email),
-        }
-      );
-
-      console.log(await res.json());
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   return (
@@ -269,38 +224,7 @@ const Chat = () => {
           </div>
         </div>
         <div className="chat-main">
-          <aside className={`chat-sidebar ${chatId ? "hid" : ""}`}>
-            <div className="user-chats-top">
-              <p>All</p>
-              <p>Read</p>
-              <p>Unread</p>
-            </div>
-            <ul className="user-chats">
-              {usersChats.map((chat, i) => (
-                <li key={chat.id}>
-                  {/* step 2 */}
-                  {/* set the chat id as a param */}
-                  <Link to={`/chat/${chat.id}`}>
-                    <img
-                      src="/user-img.png"
-                      alt="user photo"
-                      className="user-photo"
-                    />
-                    <div className="text">
-                      <div className="text-top">
-                        <p className="username">Phoenix Baker</p>
-                        <span className="time"> 11:58 </span>
-                      </div>
-                      <div className="text-bottom">
-                        <p className="last-mgs">Lorem ips</p>
-                        <span className="unread-mgs-count">03</span>
-                      </div>
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </aside>
+          <Chats user={user} />
           {chatId && (
             <div className="chat-messages">
               <div className="chat-messages-top">
